@@ -11,6 +11,7 @@
 |
 */
 
-$app->get('/', function () use ($app) {
-    return $app->version();
-});
+$app->get('/', 'StorageController@table_showAll');
+$app->get('/{table}', 'StorageController@table_show');
+$app->post('/', 'StorageController@table_store');
+$app->delete('/{table}', 'StorageController@table_remove');
