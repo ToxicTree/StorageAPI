@@ -60,11 +60,8 @@ class TableController extends Controller
             return false;
 
         Schema::create($tableName, function($t) use ($table){
-            $t->increments('id');
-            
             foreach ($table as $key => $value){
-                if ($key != "id" && $key != "tablename")
-                    $t->$value($key);
+                $t->$value($key);
             }
         });
 

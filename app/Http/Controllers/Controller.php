@@ -41,19 +41,25 @@ class Controller extends BaseController
             return abort(400, "No tablename given.");
 
         $tableName = $request->tablename;
-        $table = $request->input();
+
+        $table = array();
+        $table['id'] = "increments";
+        
+        foreach ($request->input() as $column => $type) {
+            if ($column != "id" && $column != "tablename") // Don´t use these
+                if ($type=="text" || $type=="integer")     // Enabled types
+                	$table[$column] = $type;
+        }
 
         if (!TableController::table_store($tableName,$table))
         	return abort(500, "Failed to create Table '$tableName'");
-        
+
         // Summary of the created table
         echo "<pre>";
         echo "CREATE TABLE '$tableName'\n";
         echo "(\n";
-        echo "    'id' integer not null primary key autoincrement\n";
-        foreach ($table as $key => $value) {
-        	if ($key != "id" && $key != "tablename")
-            	echo "    '$key' $value\n";
+        foreach ($table as $column => $type) {
+            echo "    '$column' $type\n";
         }
         echo ")</pre>";
 
