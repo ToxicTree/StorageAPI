@@ -6,7 +6,7 @@ Simple Storage API using sqlite, built upon [Lumen](https://github.com/laravel/l
 <tr><th>HTTP Method</th>    <th>URI</th>            <th>Action</th></tr>
 <tr><td>GET/HEAD</td>       <td>api/</td>           <td>Fetches all tables</td></tr>
 <tr><td>GET/HEAD</td>       <td>api/table</td>      <td>Fetches specified table</td></tr>
-<tr><td>POST</td>           <td>api/</td>           <td>Creates a new table (need field 'name')</td></tr>
+<tr><td>POST</td>           <td>api/</td>           <td>Creates a new table</td></tr>
 <tr><td><s>PUT/PATCH</s></td>      <td><s>api/table</s></td>      <td><s>Updates an existing table</s></td></tr>
 <tr><td>DELETE</td>         <td>api/table</td>      <td>Deletes specified table</td></tr>
 </table>
