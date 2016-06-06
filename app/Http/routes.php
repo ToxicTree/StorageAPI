@@ -11,7 +11,7 @@
 |
 */
 
-$app->get('/', 'StorageController@table_showAll');
-$app->get('/{table}', 'StorageController@table_show');
-$app->post('/', 'StorageController@table_store');
-$app->delete('/{table}', 'StorageController@table_remove');
+$app->get   ('/',            'Controller@t_showAll');
+$app->get   ('/{tableName}', 'Controller@t_show');
+$app->post  ('/',            'Controller@t_store');
+$app->delete('/{tableName}', 'Controller@t_remove');
