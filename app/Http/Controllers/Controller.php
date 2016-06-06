@@ -37,15 +37,27 @@ class Controller extends BaseController
      */
     public function t_store(Request $request)
     {
-        if (!$request->has('name'))
-            return abort(400, "No name given.");
+        if (!$request->has('tablename'))
+            return abort(400, "No tablename given.");
 
-        $tableName = $request->name;
+        $tableName = $request->tablename;
+        $table = $request->input();
 
-        if (!TableController::table_store($tableName))
+        if (!TableController::table_store($tableName,$table))
         	return abort(500, "Failed to create Table '$tableName'");
+        
+        // Summary of the created table
+        echo "<pre>";
+        echo "CREATE TABLE '$tableName'\n";
+        echo "(\n";
+        echo "    'id' integer not null primary key autoincrement\n";
+        foreach ($table as $key => $value) {
+        	if ($key != "id" && $key != "tablename")
+            	echo "    '$key' $value\n";
+        }
+        echo ")</pre>";
 
-        return $this->t_show($tableName);
+        return "";
     }
 
     /**

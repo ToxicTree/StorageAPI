@@ -51,16 +51,21 @@ class TableController extends Controller
      * Create/Replace table.
      *
      * @param  string $tableName
+     * @param  object $table
      * @return true|false
      */
-    public static function table_store($tableName)
+    public static function table_store($tableName,$table)
     {
         if (!TableController::table_remove($tableName))
             return false;
 
-        Schema::create($tableName, function($table){
-            $table->increments('id');
-            $table->text('contents');
+        Schema::create($tableName, function($t) use ($table){
+            $t->increments('id');
+            
+            foreach ($table as $key => $value){
+                if ($key != "id" && $key != "tablename")
+                    $t->$value($key);
+            }
         });
 
         return true;
