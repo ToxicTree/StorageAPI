@@ -7,169 +7,84 @@ use DB;
 
 class TableController extends Controller
 {
+
     /**
      * Check if table exists
      *
      * @param  string $tableName
      * @return true|false
      */
-    public static function table_exists($tableName)
+    public static function tableExists($tableName)
     {
         if (Schema::hasTable($tableName) && $tableName!='sqlite_sequence')
             return true;
+
         return false;
     }
 
     /**
-     * Retrieve all tables.
+     * Retrieve info about table with the given name.
      *
+     * @param  string $tableName
      * @return array
      */
-    public static function table_showAll()
+    public static function tableInfo($tableName)
     {
-        if (!DatabaseController::database_exists())
-            DatabaseController::database_create();
+        $result = [ 'tablename' => $tableName ];
 
-        $tables = DB::select("SELECT * FROM sqlite_master WHERE type='table' AND name!='sqlite_sequence'");
+        $tableInfo = DB::select( "PRAGMA table_info('$tableName')" );
+        
+        for ($i=0 ; $i<count($tableInfo) ; $i++)
+            $result['columns'][] = ['name' => $tableInfo[$i]->name, 'type' => $tableInfo[$i]->type ];
 
-        $result = [];
-        foreach ($tables as $t){
-            $result[$t->name] = Schema::getColumnListing($t->name);
-        }
         return $result;
     }
 
-    /**
-     * Retrieve table with the given name.
-     *
-     * @param  string $tableName
-     * @return array|false
-     */
-    public static function table_show($tableName)
-    {
-        if (TableController::table_exists($tableName))
-            return DB::table($tableName)->get();
-
-        return null;
-    }
 
     /**
-     * Retrieve table with the given name.
-     *
-     * @param  string $tableName
-     * @return array|false
-     */
-    public static function table_showInfo($tableName)
-    {
-        if (TableController::table_exists($tableName)){
-
-            $tableInfo = DB::select( "PRAGMA table_info('$tableName')" );
-            
-            $result = [ 'tablename' => $tableName ];
-            
-            $result['columns'] = [];
-            
-            for ($i=0 ; $i<count($tableInfo) ; $i++)
-                $result['columns'][] = ['name' => $tableInfo[$i]->name, 'type' => $tableInfo[$i]->type ];
-
-            return $result;
-        }
-
-        return null;
-    }
-
-    /**
-     * Create/Replace table.
-     *
-     * @param  string $tableName
-     * @param  object $table
-     * @return true|false
-     */
-    public static function table_store($tableName,$table)
-    {
-        if (!TableController::table_remove($tableName))
-            return false;
-
-        Schema::create($tableName, function($t) use ($table){
-            foreach ($table as $column => $type){
-                if ($column=="id")
-                    $t->$type($column);
-                else
-                    $t->$type($column)->nullable();
-            }
-        });
-
-        return true;
-    }
-
-    /**
-     * Update table.
-     *
-     * @param  string $tableName
-     * @param  object $table
-     * @return true|false
-     */
-    public static function table_update($tableName,$table)
-    {
-        if (!TableController::table_exists($tableName))
-            return TableController::table_store($tableName,$table);
-
-        // Drop columns not in given table
-        $drop = array();
-        $oldColumns = Schema::getColumnListing($tableName);
-        foreach ($oldColumns as $oldColumn){
-            $keep = false;
-            foreach ($table as $column => $type){
-                if ($column == $oldColumn){
-                    $keep = true;
-                }
-            }
-            if ($keep==false){
-                $drop[$oldColumn]="remove";
-                echo "$oldColumn == DROP";
-            }
-        }
-        $add = array();
-        foreach ($table as $column => $type){
-            $new = true;
-            foreach ($oldColumns as $oldColumn){
-                if ($column == $oldColumn){
-                    $new = false;
-                }
-            }
-            if ($new==true){
-                $add[$column]=$type;
-                echo "$column == NEW";
-            }
-        }
-
-        Schema::table($tableName, function($t) use ($drop,$add){
-            foreach ($drop as $column => $type){
-                $t->dropColumn($column);
-            }
-            foreach ($add as $column => $type){
-                $t->$type($column)->nullable();
-            }
-        });
-
-        return true;
-    }
-
-
-    /**
-     * Remove table.
+     * Remove table with the given name.
      *
      * @param  string $tableName
      * @return true|false
      */
-    public static function table_remove($tableName)
+    public static function tableRemove($tableName)
     {
         Schema::dropIfExists($tableName);
 
-        if (TableController::table_exists($tableName))
+        if (TableController::tableExists($tableName))
             return false;
 
         return true;
+    }
+
+    /**
+     * Retrieve table with the given name or all tables.
+     *
+     * @param  string $tableName
+     * @return array
+     */
+    public static function tableGet($tableName)
+    {
+        $result = [];
+
+        if (!$tableName){
+
+            $tables = DB::select("SELECT * FROM sqlite_master WHERE type='table' AND name!='sqlite_sequence'");
+
+            foreach ($tables as $t)
+                $result[] = TableController::tableInfo($t->name);
+
+        }
+
+        else if (TableController::tableExists($tableName)){
+            
+            $result[0] = TableController::tableInfo($tableName);
+
+            $result[0]['data'] = RowController::rowGet($tableName,false);
+            
+        }
+
+        return $result;
     }
 
 }

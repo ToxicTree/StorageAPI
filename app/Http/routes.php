@@ -10,22 +10,16 @@
 | and give it the Closure to call when that URI is requested.
 |
 */
-
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, GET, DELETE, OPTIONS, PUT, PATCH');
-header("Access-Control-Allow-Headers: Authorization, X-Requested-With,  Content-Type, Accept");
 
-$app->get   ('/',            'Controller@t_showAll');
-$app->get   ('/{tableName}/info', 'Controller@t_showInfo');
+$app->get   ('/',            'Controller@tableGetAll_');
 
-$app->get   ('/{tableName}', 'Controller@t_show');
-$app->post  ('/',            'Controller@t_store');
-$app->put   ('/{tableName}', 'Controller@t_update');
-$app->patch ('/{tableName}', 'Controller@t_update');
-$app->delete('/{tableName}', 'Controller@t_remove');
+$app->get   ('/{tableName}', 'Controller@tableGet_');
+//$app->post  ('/',            'Controller@t_store');
+//$app->put   ('/{tableName}', 'Controller@t_update');
+$app->delete('/{tableName}', 'Controller@tableRemove_');
 
-$app->get   ('/{tableName}/{id}', 'Controller@r_show');
-$app->post  ('/{tableName}/',     'Controller@r_store');
-$app->put   ('/{tableName}/{id}', 'Controller@r_update');
-$app->patch ('/{tableName}/{id}', 'Controller@r_update');
-$app->delete('/{tableName}/{id}', 'Controller@r_remove');
+$app->get   ('/{tableName}/{id}', 'Controller@rowGet_');
+//$app->post  ('/{tableName}/',     'Controller@r_store');
+//$app->put   ('/{tableName}/{id}', 'Controller@r_update');
+$app->delete('/{tableName}/{id}', 'Controller@rowRemove_');
