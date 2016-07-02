@@ -9,7 +9,7 @@ class RowController extends Controller
 {
 
     /**
-     * Retrieve row with the given id from table with the given name.
+     * Retrieve row with the given id (or all) from table with the given name.
      *
      * @param  string $tableName
      * @param  int $id
@@ -45,6 +45,66 @@ class RowController extends Controller
                 return true;
 
         return false;
+    }
+
+    /**
+     * Create row.
+     *
+     * @param  string $tableName
+     * @param  object $row
+     * @return array
+     */
+    public static function rowStore($tableName,$row)
+    {
+        $insert = array();
+
+        // Only use existing columns
+        $structure = TableController::tableInfo($tableName);
+
+        foreach ($structure->columns as $column => $value){
+
+            foreach ($row as $columnR => $valueR){
+
+                if ($columnR == $column)
+                    $insert[$column] = $valueR;
+
+            }
+
+        }
+
+        $id = DB::table($tableName)->insertGetId($insert);
+
+        return RowController::rowGet($tableName,$id);
+    }
+
+    /**
+     * Update row.
+     *
+     * @param  string $tableName
+     * @param  object $row
+     * @return array
+     */
+    public static function rowUpdate($tableName,$row)
+    {
+        $update = array();
+
+        // Only use existing columns
+        $structure = TableController::tableInfo($tableName);
+
+        foreach ($structure['columns'] as $column){
+
+            foreach ($row as $columnR => $valueR){
+
+                if ($columnR == $column['name'] && $column['name'] != 'id')
+                    $update[$columnR] = $valueR;
+
+            }
+
+        }
+
+        DB::table($tableName)->where('id', $row['id'])->update($update);
+
+        return RowController::rowGet($tableName,$row['id']);
     }
 
 }

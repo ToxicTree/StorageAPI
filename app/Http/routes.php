@@ -15,11 +15,11 @@ header('Access-Control-Allow-Origin: *');
 $app->get   ('/',            'Controller@tableGetAll_');
 
 $app->get   ('/{tableName}', 'Controller@tableGet_');
-//$app->post  ('/',            'Controller@t_store');
-//$app->put   ('/{tableName}', 'Controller@t_update');
+$app->post  ('/',            'Controller@tableStore_');
+$app->put   ('/{tableName}', 'Controller@tableUpdate_');
 $app->delete('/{tableName}', 'Controller@tableRemove_');
 
 $app->get   ('/{tableName}/{id}', 'Controller@rowGet_');
-//$app->post  ('/{tableName}/',     'Controller@r_store');
-//$app->put   ('/{tableName}/{id}', 'Controller@r_update');
+$app->post  ('/{tableName}/',     'Controller@rowStore_');
+$app->put   ('/{tableName}/{id}', 'Controller@rowUpdate_');
 $app->delete('/{tableName}/{id}', 'Controller@rowRemove_');

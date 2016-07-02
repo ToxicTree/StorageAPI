@@ -35,7 +35,12 @@ class TableController extends Controller
         $tableInfo = DB::select( "PRAGMA table_info('$tableName')" );
         
         for ($i=0 ; $i<count($tableInfo) ; $i++)
-            $result['columns'][] = ['name' => $tableInfo[$i]->name, 'type' => $tableInfo[$i]->type ];
+            $result['columns'][] = [
+                'name' => $tableInfo[$i]->name,
+                'originalName' => $tableInfo[$i]->name,
+                'type' => strtoupper($tableInfo[$i]->type),
+                'originalType' => strtoupper($tableInfo[$i]->type)
+            ];
 
         return $result;
     }
@@ -85,6 +90,126 @@ class TableController extends Controller
         }
 
         return $result;
+    }
+
+    /**
+     * Create table.
+     *
+     * @param  string $tableName
+     * @param  object $structure
+     * @return array
+     */
+    public static function tableStore($tableName,$structure)
+    {
+        if (TableController::tableExists($tableName))
+            return TableController::tableUpdate($tableName,$structure);
+
+        Schema::create($tableName, function($t) use ($structure){
+
+            foreach ($structure as $column => $type){
+
+                if ($column=="id")
+                    $t->$type($column);
+
+                else
+                    $t->$type($column)->nullable();
+
+            }
+
+        });
+
+        return TableController::tableGet($tableName);
+    }
+
+    /**
+     * Update table.
+     *
+     * @param  string $tableName
+     * @param  object $structure
+     * @return array
+     */
+    public static function tableUpdate($tableName,$structureNew)
+    {
+        if (!TableController::tableExists($tableName))
+            return TableController::tableStore($tableName,$structureNew);
+
+        $tableInfo = TableController::tableInfo($tableName);
+
+        $structureOld = $tableInfo['columns'];
+        
+        // Check for new columns
+        $addThese = array();
+
+        foreach ($structureNew as $columnNew){
+
+            $add = true;
+
+            foreach ($structureOld as $columnOld) {
+
+                // Column exists
+                if ($columnOld['originalName'] == $columnNew['originalName'])
+                    $add = false;
+
+            }
+
+            // No match, add column
+            if ($add)
+                $addThese[] = $columnNew;
+
+        }
+
+        Schema::table($tableName, function($table) use ($addThese){
+            
+            foreach ($addThese as $column)
+                $table->$column['originalType']($column['originalName'])->nullable();
+
+        });
+
+        // Check existing columns
+        $dropThese = array();
+
+        foreach ($structureOld as $columnOld) {
+            
+            $drop = true;
+
+            foreach ($structureNew as $columnNew){
+
+                // Column exists
+                if ($columnOld['originalName'] == $columnNew['originalName'])
+                    $drop = false;
+
+            }
+
+            // No match, drop column
+            if ($drop)
+                $dropThese[] = $columnOld['originalName'];
+
+        }
+
+        Schema::table($tableName, function($table) use ($dropThese){
+            
+            $table->dropColumn($dropThese);
+
+        });
+
+        // Check for renamed columns
+        foreach ($structureNew as $columnNew){
+
+            // Column renamed
+            if (isset($columnNew['name']) && $columnNew['originalName'] != $columnNew['name']){
+
+                Schema::table($tableName, function($table) use ($columnNew){
+
+                    $table->renameColumn($columnNew['originalName'], $columnNew['name']);
+
+                });
+                
+            }
+
+        }
+
+
+        return TableController::tableGet($tableName);
     }
 
 }
