@@ -54,27 +54,21 @@ class RowController extends Controller
      * @param  object $row
      * @return array
      */
-    public static function rowStore($tableName,$row)
+    public static function rowStore($tableName)
     {
-        $insert = array();
+        $insert = [];
 
-        // Only use existing columns
+        // Get existing columns
         $structure = TableController::tableInfo($tableName);
 
-        foreach ($structure->columns as $column => $value){
+        foreach ($structure['columns'] as $column)
+            if ($column['originalName'] != 'id')
+                $insert[ $column['originalName'] ]= ' ' ;
 
-            foreach ($row as $columnR => $valueR){
-
-                if ($columnR == $column)
-                    $insert[$column] = $valueR;
-
-            }
-
-        }
 
         $id = DB::table($tableName)->insertGetId($insert);
 
-        return RowController::rowGet($tableName,$id);
+        return RowController::rowGet($tableName, $id);
     }
 
     /**

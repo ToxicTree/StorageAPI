@@ -20,6 +20,6 @@ $app->put   ('/{tableName}', 'Controller@tableUpdate_');
 $app->delete('/{tableName}', 'Controller@tableRemove_');
 
 $app->get   ('/{tableName}/{id}', 'Controller@rowGet_');
-$app->post  ('/{tableName}/',     'Controller@rowStore_');
+$app->post  ('/{tableName}',      'Controller@rowStore_');
 $app->put   ('/{tableName}/{id}', 'Controller@rowUpdate_');
 $app->delete('/{tableName}/{id}', 'Controller@rowRemove_');

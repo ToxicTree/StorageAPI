@@ -79,19 +79,8 @@ class Controller extends BaseController
     {
         if (!TableController::tableExists($tableName))
             return abort(404, "Table '$tableName' don´t exist.");
-        
-        $row = array();
 
-        foreach ($request->input() as $column => $value) {
-
-            if ($column != "id") // Don´t use these
-                $row[$column] = $value;
-
-        }
-
-        $id = RowController::rowStore($tableName,$row);
-
-        return RowController::rowGet($tableName,$id);
+        return RowController::rowStore($tableName);
     }
 
     public function tableUpdate_($tableName, Request $request)

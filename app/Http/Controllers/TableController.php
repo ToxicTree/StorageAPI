@@ -85,7 +85,7 @@ class TableController extends Controller
             
             $result[0] = TableController::tableInfo($tableName);
 
-            $result[0]['data'] = RowController::rowGet($tableName,false);
+            $result[0]['data'] = RowController::rowGet($tableName,0);
             
         }
 
