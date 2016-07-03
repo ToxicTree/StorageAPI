@@ -51,31 +51,12 @@ class Controller extends BaseController
         return TableController::tableGet($tableName);
     }
 
-    public function tableStore_(Request $request)
+    public function tableStore_()
     {
-        if (!$request->has('tablename'))
-            return abort(400, "No tablename given.");
-
-        $tableName = $request->tablename;
-
-        if (!$request->has('columns'))
-            return abort(400, "No columns given.");
-
-        $structure = array();
-        $structure['id'] = "increments";
-        
-        foreach ($request->columns as $column => $type) {
-
-            if ($column != "id")                        // Don´t use these
-                if ($type=="text" || $type=="integer")  // Enabled types
-                    $structure[$column] = $type;
-
-        }
-
-        return TableController::tableStore($tableName,$structure);
+        return TableController::tableStore();
     }
 
-    public function rowStore_($tableName, Request $request)
+    public function rowStore_($tableName)
     {
         if (!TableController::tableExists($tableName))
             return abort(404, "Table '$tableName' don´t exist.");
@@ -88,20 +69,19 @@ class Controller extends BaseController
         if (!$request->has('columns'))
             return abort(400, "No columns given.");
 
-        $structure = array();
-        $structure[] = array('originalName' => 'id', 'originalType' => "increments");
-
-        $columns =  $request->input('columns');
+        $tableinfoNew = [ 'tablename' => $request->input('tablename'), 'originalTablename' => $tableName ];
         
-        foreach ($columns as $columnNew){
+        $tableinfoNew['columns'][] = array('originalName' => 'id', 'originalType' => "increments");
+
+        foreach ($request->input('columns') as $columnNew){
 
             if ($columnNew['originalName'] != "id")                                        // Don´t use these
                 if (strtoupper($columnNew['originalType'])=="TEXT" || strtoupper($columnNew['originalType'])=="INTEGER")  // Enabled types
-                    $structure[] = $columnNew;
+                    $tableinfoNew['columns'][] = $columnNew;
 
         }
 
-        return TableController::tableUpdate($tableName,$structure);
+        return TableController::tableUpdate($tableName,$tableinfoNew);
     }
 
     public function rowUpdate_($tableName, $id, Request $request)

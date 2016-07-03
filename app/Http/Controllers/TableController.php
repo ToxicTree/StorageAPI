@@ -30,7 +30,7 @@ class TableController extends Controller
      */
     public static function tableInfo($tableName)
     {
-        $result = [ 'tablename' => $tableName ];
+        $result = [ 'tablename' => $tableName, 'originalTablename' => $tableName ];
 
         $tableInfo = DB::select( "PRAGMA table_info('$tableName')" );
         
@@ -95,30 +95,17 @@ class TableController extends Controller
     /**
      * Create table.
      *
-     * @param  string $tableName
-     * @param  object $structure
      * @return array
      */
-    public static function tableStore($tableName,$structure)
+    public static function tableStore()
     {
-        if (TableController::tableExists($tableName))
-            return TableController::tableUpdate($tableName,$structure);
-
-        Schema::create($tableName, function($t) use ($structure){
-
-            foreach ($structure as $column => $type){
-
-                if ($column=="id")
-                    $t->$type($column);
-
-                else
-                    $t->$type($column)->nullable();
-
-            }
+        Schema::create('_temp_', function($table){
+            
+            $table->increments('id');
 
         });
 
-        return TableController::tableGet($tableName);
+        return TableController::tableGet('_temp_');
     }
 
     /**
@@ -128,15 +115,20 @@ class TableController extends Controller
      * @param  object $structure
      * @return array
      */
-    public static function tableUpdate($tableName,$structureNew)
+    public static function tableUpdate($tableName,$tableInfoNew)
     {
         if (!TableController::tableExists($tableName))
-            return TableController::tableStore($tableName,$structureNew);
+            return TableController::tableStore();
 
-        $tableInfo = TableController::tableInfo($tableName);
+        // Get Current table
+        $tableInfoOld = TableController::tableInfo($tableName);
 
-        $structureOld = $tableInfo['columns'];
+        $structureOld = $tableInfoOld['columns'];
+
+        // Get New table
+        $structureNew = $tableInfoNew['columns'];
         
+
         // Check for new columns
         $addThese = array();
 
@@ -208,8 +200,12 @@ class TableController extends Controller
 
         }
 
+        // Check for rename table
+        if ($tableInfoNew['originalTablename'] != $tableInfoNew['tablename'])
+            Schema::rename($tableInfoNew['originalTablename'], $tableInfoNew['tablename']);
 
-        return TableController::tableGet($tableName);
+
+        return TableController::tableGet($tableInfoNew['tablename']);
     }
 
 }
