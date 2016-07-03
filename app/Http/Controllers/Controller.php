@@ -32,11 +32,6 @@ class Controller extends BaseController
         return TableController::tableGet($tableName);
     }
 
-    public function rowGet_($tableName,$id)
-    {
-        return RowController::rowGet($tableName,$id);
-    }
-
     public function tableRemove_($tableName)
     {
         TableController::tableRemove($tableName);
@@ -44,16 +39,46 @@ class Controller extends BaseController
         return TableController::tableGet(false);
     }
 
+    public function tableStore_()
+    {
+        return TableController::tableStore();
+    }
+
+    public function tableUpdate_($tableName, Request $request)
+    {
+        if (!$request->has('columns'))
+            return abort(400, "No columns given.");
+
+        $tableinfoNew = [
+            'tablename' => $request->input('tablename'),
+            'originalTablename' => $tableName,
+            'columns' => [
+                0 => [ 'originalName' => 'id', 'originalType' => 'increments' ]
+            ]
+        ];
+
+        foreach ($request->input('columns') as $columnNew){
+
+            if ($columnNew['originalName'] != "id")
+                if (strtoupper($columnNew['originalType'])=="TEXT" || strtoupper($columnNew['originalType'])=="INTEGER")
+                    $tableinfoNew['columns'][] = $columnNew;
+
+        }
+
+        return TableController::tableUpdate($tableName,$tableinfoNew);
+    }
+
+
+    public function rowGet_($tableName,$id)
+    {
+        return RowController::rowGet($tableName,$id);
+    }
+
     public function rowRemove_($tableName,$id)
     {
         RowController::rowRemove($tableName,$id);
 
         return TableController::tableGet($tableName);
-    }
-
-    public function tableStore_()
-    {
-        return TableController::tableStore();
     }
 
     public function rowStore_($tableName)
@@ -64,37 +89,16 @@ class Controller extends BaseController
         return RowController::rowStore($tableName);
     }
 
-    public function tableUpdate_($tableName, Request $request)
-    {
-        if (!$request->has('columns'))
-            return abort(400, "No columns given.");
-
-        $tableinfoNew = [ 'tablename' => $request->input('tablename'), 'originalTablename' => $tableName ];
-        
-        $tableinfoNew['columns'][] = array('originalName' => 'id', 'originalType' => "increments");
-
-        foreach ($request->input('columns') as $columnNew){
-
-            if ($columnNew['originalName'] != "id")                                        // Don´t use these
-                if (strtoupper($columnNew['originalType'])=="TEXT" || strtoupper($columnNew['originalType'])=="INTEGER")  // Enabled types
-                    $tableinfoNew['columns'][] = $columnNew;
-
-        }
-
-        return TableController::tableUpdate($tableName,$tableinfoNew);
-    }
-
     public function rowUpdate_($tableName, $id, Request $request)
     {
         if (!TableController::tableExists($tableName))
             return abort(404, "Table '$tableName' don´t exist.");
         
-        $row = array();
-        $row['id'] = $id;
+        $row = [ 'id' => $id ];
 
         foreach ($request->input() as $column => $value) {
 
-            if ($column != "id") // Don´t use these
+            if ($column != "id")
                 $row[$column] = $value;
 
         }

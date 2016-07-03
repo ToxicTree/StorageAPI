@@ -48,10 +48,9 @@ class RowController extends Controller
     }
 
     /**
-     * Create row.
+     * Create row in table with the given name.
      *
      * @param  string $tableName
-     * @param  object $row
      * @return array
      */
     public static function rowStore($tableName)
@@ -63,7 +62,7 @@ class RowController extends Controller
 
         foreach ($structure['columns'] as $column)
             if ($column['originalName'] != 'id')
-                $insert[ $column['originalName'] ]= ' ' ;
+                $insert[ $column['originalName'] ] = '0' ;
 
 
         $id = DB::table($tableName)->insertGetId($insert);
@@ -72,7 +71,7 @@ class RowController extends Controller
     }
 
     /**
-     * Update row.
+     * Update row in table with the given name.
      *
      * @param  string $tableName
      * @param  object $row
@@ -80,9 +79,9 @@ class RowController extends Controller
      */
     public static function rowUpdate($tableName,$row)
     {
-        $update = array();
+        $update = [];
 
-        // Only use existing columns
+        // Get existing columns
         $structure = TableController::tableInfo($tableName);
 
         foreach ($structure['columns'] as $column){

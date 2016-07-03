@@ -112,31 +112,26 @@ class TableController extends Controller
      * Update table.
      *
      * @param  string $tableName
-     * @param  object $structure
+     * @param  object $structureNew
      * @return array
      */
-    public static function tableUpdate($tableName,$tableInfoNew)
+    public static function tableUpdate($tableName,$structureNew)
     {
         if (!TableController::tableExists($tableName))
             return TableController::tableStore();
 
         // Get Current table
-        $tableInfoOld = TableController::tableInfo($tableName);
-
-        $structureOld = $tableInfoOld['columns'];
-
-        // Get New table
-        $structureNew = $tableInfoNew['columns'];
-        
+        $structureOld = TableController::tableInfo($tableName);
+       
 
         // Check for new columns
         $addThese = array();
 
-        foreach ($structureNew as $columnNew){
+        foreach ($structureNew['columns'] as $columnNew){
 
             $add = true;
 
-            foreach ($structureOld as $columnOld) {
+            foreach ($structureOld['columns'] as $columnOld) {
 
                 // Column exists
                 if ($columnOld['originalName'] == $columnNew['originalName'])
@@ -157,14 +152,15 @@ class TableController extends Controller
 
         });
 
+
         // Check existing columns
         $dropThese = array();
 
-        foreach ($structureOld as $columnOld) {
+        foreach ($structureOld['columns'] as $columnOld) {
             
             $drop = true;
 
-            foreach ($structureNew as $columnNew){
+            foreach ($structureNew['columns'] as $columnNew){
 
                 // Column exists
                 if ($columnOld['originalName'] == $columnNew['originalName'])
@@ -184,8 +180,9 @@ class TableController extends Controller
 
         });
 
+
         // Check for renamed columns
-        foreach ($structureNew as $columnNew){
+        foreach ($structureNew['columns'] as $columnNew){
 
             // Column renamed
             if (isset($columnNew['name']) && $columnNew['originalName'] != $columnNew['name']){
@@ -200,12 +197,13 @@ class TableController extends Controller
 
         }
 
+
         // Check for rename table
-        if ($tableInfoNew['originalTablename'] != $tableInfoNew['tablename'])
-            Schema::rename($tableInfoNew['originalTablename'], $tableInfoNew['tablename']);
+        if ($structureNew['originalTablename'] != $structureNew['tablename'])
+            Schema::rename($structureNew['originalTablename'], $structureNew['tablename']);
 
 
-        return TableController::tableGet($tableInfoNew['tablename']);
+        return TableController::tableGet($structureNew['tablename']);
     }
 
 }
