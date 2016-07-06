@@ -3,12 +3,19 @@ Simple Storage API using sqlite, built upon [Lumen](https://github.com/laravel/l
 
 ##### API Endpoints
 <table>
-<tr><th>HTTP Method</th>    <th>URI</th>            <th>Action</th></tr>
-<tr><td>GET/HEAD</td>       <td>api/</td>           <td>Fetches all tables</td></tr>
-<tr><td>GET/HEAD</td>       <td>api/table</td>      <td>Fetches specified table</td></tr>
-<tr><td>POST</td>           <td>api/</td>           <td>Creates a new table</td></tr>
-<tr><td><s>PUT/PATCH</s></td>      <td><s>api/table</s></td>      <td><s>Updates an existing table</s></td></tr>
-<tr><td>DELETE</td>         <td>api/table</td>      <td>Deletes specified table</td></tr>
+<tr><th>HTTP Method</th> <th>URI</th>          <th>Action</th></tr>
+
+<tr><td>GET</td>         <td>api/</td>         <td>Fetches all tables</td></tr>
+<tr><td>GET</td>         <td>api/table</td>    <td>Fetches all posts in specified table</td></tr>
+<tr><td>GET</td>         <td>api/table/id</td> <td>Fetches post with specified id from table</td></tr>
+
+<tr><td>POST</td>        <td>api/</td>         <td>Creates a new table</td></tr>
+<tr><td>PUT</td>         <td>api/table</td>    <td>Updates an existing table</td></tr>
+<tr><td>DELETE</td>      <td>api/table</td>    <td>Deletes specified table</td></tr>
+
+<tr><td>POST</td>        <td>api/table</td>    <td>Creates a new post in table</td></tr>
+<tr><td>PUT</td>         <td>api/table/id</td> <td>Updates a existing post in table</td></tr>
+<tr><td>DELETE</td>      <td>api/table/id</td> <td>Deletes specified id from table</td></tr>
 </table>
 
 ##### Install
