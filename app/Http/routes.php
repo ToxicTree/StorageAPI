@@ -10,7 +10,6 @@
 | and give it the Closure to call when that URI is requested.
 |
 */
-header('Access-Control-Allow-Origin: *');
 
 $app->get   ('/',            'Controller@tableGetAll_');
 
