@@ -34,7 +34,7 @@ class Controller extends BaseController
 
     public function tableRemove_($tableName)
     {
-        TableController::tableRemove($tableName);
+        TableController::tableRemove(str_replace('%20',' ',$tableName));
 
         return TableController::tableGet(false);
     }

@@ -99,6 +99,9 @@ class TableController extends Controller
      */
     public static function tableStore()
     {
+        if (TableController::tableExists('_temp_'))
+            return TableController::tableGet('_temp_');
+        
         Schema::create('_temp_', function($table){
             
             $table->increments('id');
