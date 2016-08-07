@@ -76,17 +76,32 @@ class Controller extends BaseController
 
     public function rowRemove_($tableName,$id)
     {
-        RowController::rowRemove($tableName,$id);
+        $ids = [];
+        
+        $intervals = explode(',',$id);
+
+        for ($i=0 ; $i<count($intervals) ; $i++){
+            $set = explode('-',$intervals[$i]);
+            if (count($set)==2)
+                for ($s=$set[0] ; $s<=$set[1] ; $s++)
+                    array_push( $ids, $s );
+            else
+                array_push( $ids, $set[0] );
+        }
+
+        RowController::rowRemove($tableName,$ids);
 
         return TableController::tableGet($tableName);
     }
 
-    public function rowStore_($tableName)
+    public function rowStore_($tableName, Request $request)
     {
         if (!TableController::tableExists($tableName))
             return abort(404, "Table '$tableName' don´t exist.");
 
-        return RowController::rowStore($tableName);
+        $data = ($request->has('rows')) ? $request->input('rows') : false;
+
+        return RowController::rowStore($tableName,$data);
     }
 
     public function rowUpdate_($tableName, $id, Request $request)

@@ -38,36 +38,70 @@ class RowController extends Controller
      * @param  int $id
      * @return true|false
      */
-    public static function rowRemove($tableName,$id)
+    public static function rowRemove($tableName,$ids)
     {
         if (TableController::tableExists($tableName))
-            if (DB::table($tableName)->where('id', $id)->delete())
+            if (DB::table($tableName)->whereIn('id', $ids)->delete())
                 return true;
 
         return false;
     }
 
     /**
-     * Create row in table with the given name.
+     * Create rows in table with the given name.
      *
      * @param  string $tableName
      * @return array
      */
-    public static function rowStore($tableName)
+    public static function rowStore($tableName,$data)
     {
+        // Get existing columns
+        $table = TableController::tableGet($tableName)[0];
+
         $insert = [];
 
-        // Get existing columns
-        $structure = TableController::tableInfo($tableName);
+        $update = [];
 
-        foreach ($structure['columns'] as $column)
-            if ($column['originalName'] != 'id')
-                $insert[ $column['originalName'] ] = '0' ;
+        if ($data){
+            
+            for ($i=0 ; $i<count($data) ; $i++){
+                // Unique check
+                $unique = true;
 
+                for ($d=0 ; $d<count($table['data']) ; $d++){
 
-        $id = DB::table($tableName)->insertGetId($insert);
+                    //if unique-marked
+                    if ($table['data'][$d]->PostID == $data[$i]['PostID']){
+                        $unique = false;
+                    }
+                }
 
-        return RowController::rowGet($tableName, $id);
+                if ($unique){
+                    $insert[$i] = [];
+                    foreach ($table['columns'] as $column)
+                        if ($column['originalName'] != 'id')
+                            if ( isset($data[$i][ $column['originalName'] ]) )
+                                $insert[$i][ $column['originalName'] ] = $data[$i][ $column['originalName'] ];
+                }
+            }
+
+            DB::table($tableName)->insert($insert);
+
+            return TableController::tableGet($tableName);
+
+        }
+        else {
+
+            foreach ($table['columns'] as $column)
+                if ($column['originalName'] != 'id')
+                    $insert[ $column['originalName'] ] = '0' ;
+            
+            $id = DB::table($tableName)->insertGetId($insert);
+
+            return RowController::rowGet($tableName, $id);
+
+        }
+
     }
 
     /**
@@ -82,14 +116,37 @@ class RowController extends Controller
         $update = [];
 
         // Get existing columns
-        $structure = TableController::tableInfo($tableName);
+        $table = TableController::tableGet($tableName)[0];
 
-        foreach ($structure['columns'] as $column){
+
+
+        foreach ($table['columns'] as $columnT){
 
             foreach ($row as $columnR => $valueR){
 
-                if ($columnR == $column['name'] && $column['name'] != 'id')
-                    $update[$columnR] = $valueR;
+                if ($columnR == $columnT['name'] && $columnT['name'] != 'id'){
+
+                    // Unique check
+                    $unique = true;
+                    $uniqueColumn = 'PostID';
+
+                    //if unique-marked
+                    if ( $columnT['name']==$uniqueColumn && isset($row[$uniqueColumn]) )
+
+                        for ($d=0 ; $d<count($table['data']) ; $d++){
+
+                            if ($table['data'][$d]->$uniqueColumn == $row[$uniqueColumn])
+
+                                $unique = false;
+                            
+                        }
+
+
+                    if ($unique)
+
+                        $update[$columnR] = $valueR;
+
+                }
 
             }
 
