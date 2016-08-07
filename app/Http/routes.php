@@ -11,6 +11,17 @@
 |
 */
 
+// Cors Fix
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE, HEAD');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+
+// Options/Preflight Fix
+$app->options('/', function () { return 'OK'; });
+$app->options('/{tableName}', function ($tableName) { return 'OK'; });
+$app->options('/{tableName}/{id}', function ($tableName,$id) { return 'OK'; });
+
+
 $app->get   ('/',            'Controller@tableGetAll_');
 
 $app->get   ('/{tableName}', 'Controller@tableGet_');
