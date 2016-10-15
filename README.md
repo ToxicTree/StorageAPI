@@ -22,7 +22,6 @@ Simple Storage API using sqlite, built upon [Lumen](https://github.com/laravel/l
       git clone https://github.com/ToxicTree/StorageAPI.git
       cd StorageAPI
       composer install
-      cp .env.example .env
 
 ##### Running development server
       cd public
