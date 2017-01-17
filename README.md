@@ -21,10 +21,14 @@ Editor can be found here: [StorageAPI_Editor](https://github.com/ToxicTree/Stora
 </table>
 
 ##### Install
-      git clone https://github.com/ToxicTree/StorageAPI.git
-      cd StorageAPI
-      composer install
+```bash
+git clone https://github.com/ToxicTree/StorageAPI.git
+cd StorageAPI
+composer install
+```
 
 ##### Running development server
-      cd public
-      php -S localhost:8000
+```bash
+cd public
+php -S localhost:8000
+```
